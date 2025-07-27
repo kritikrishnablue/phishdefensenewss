@@ -77,20 +77,28 @@ export default function Layout({ children }) {
         <div className="flex items-center justify-between px-6 py-4">
           {/* Left: Logo and Mobile Menu */}
           <div className="flex items-center gap-4">
-            <button
+            {/* <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
               className="lg:hidden p-2 rounded-lg hover:bg-gray-700 transition-colors text-gray-400"
             >
               {sidebarOpen ? <FaTimes /> : <FaBars />}
-            </button>
+            </button> */}
             
-            <div className="flex items-center gap-3">
+            {/* <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-teal-500 rounded-lg flex items-center justify-center">
                 <FaShieldAlt className="text-white text-sm" />
               </div>
               <span className="font-bold text-xl text-white">phish defense.</span>
             </div>
-          </div>
+          </div> */}
+<div className="flex items-center gap-3">
+  <img
+    src="/images/lightmodelogo.png"
+    alt="Phish Defense News Logo"
+    className="w-2xs h-fit object-contain"
+  />
+</div>
+</div>
 
           {/* Center: Navigation Links (Desktop) */}
           <nav className="hidden md:flex items-center gap-8">
@@ -130,7 +138,7 @@ export default function Layout({ children }) {
             >
               Trending
             </NavLink>
-            <NavLink
+            {/* <NavLink
               to="/bookmarks"
               className={({ isActive }) =>
                 `px-4 py-2 rounded-lg font-medium transition-colors ${
@@ -141,7 +149,7 @@ export default function Layout({ children }) {
               }
             >
               Saved
-            </NavLink>
+            </NavLink> */}
           </nav>
 
           {/* Right: Search and Actions */}
@@ -163,17 +171,34 @@ export default function Layout({ children }) {
                 className="p-2 rounded-lg hover:bg-gray-700 transition-colors text-gray-400"
                 title={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
               >
-                {isDarkMode ? <FaSun className="text-yellow-500" /> : <FaMoon className="text-gray-400" />}
+                {isDarkMode ? <FaSun className="text-yellow-500" /> : <FaMoon className="text-blue-800" />}
               </button>
               
-              <button className="p-2 rounded-lg hover:bg-gray-700 transition-colors text-gray-400">
+              {/* <button className="p-2 rounded-lg hover:bg-gray-700 transition-colors text-gray-400">
                 <FaBell />
-              </button>
-              
+              </button> */}
+                {/* to="/bookmarks"
+              className={({ isActive }) =>
+                `px-4 py-2 rounded-lg font-medium transition-colors ${
+                  isActive 
+                    ? 'text-teal-400 border-b-2 border-teal-400' 
+                    : 'text-gray-300 hover:text-white'
+                }`
+              }
+            >
+            <button className="p-2 rounded-lg hover:bg-gray-700 transition-colors text-gray-400">
+                <FaBookmark />
+              </button> 
+            </NavLink> 
               <button className="p-2 rounded-lg hover:bg-gray-700 transition-colors text-gray-400">
                 <FaBookmark />
-              </button>
-              
+              </button>  */}
+              <NavLink
+  to="/bookmarks"
+  className="p-2 rounded-lg hover:bg-gray-700 transition-colors text-gray-400"
+>
+  <FaBookmark />
+</NavLink>
               <NavLink
                 to="/settings"
                 className="p-2 rounded-lg hover:bg-gray-700 transition-colors text-gray-400"

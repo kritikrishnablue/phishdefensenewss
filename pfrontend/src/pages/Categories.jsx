@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import {  Shield, Heart, Laptop,Home,Trophy,Microscope,Building, Globe, Plane } from 'lucide-react';
+import {  Shield, Heart, Laptop,Home,Landmark,Trophy,Microscope,Building, Globe, Plane } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { FaFire } from 'react-icons/fa'; 
 
@@ -56,7 +56,7 @@ export default function Categories() {
           id: 'politics',
           title: 'Politics',
           description: 'Political developments, policy changes, and government affairs.',
-          icon: Globe,
+          icon: Landmark,
           articleCount: 189,
           trending: false,
           color: 'bg-purple-500'
