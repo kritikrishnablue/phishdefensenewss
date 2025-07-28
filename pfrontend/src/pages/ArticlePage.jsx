@@ -1,6 +1,7 @@
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useState } from 'react';
 import { FaArrowLeft, FaBookmark, FaShare, FaGlobe, FaExternalLinkAlt, FaThumbsUp, FaThumbsDown } from 'react-icons/fa';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function ArticlePage() {
   const location = useLocation();
@@ -13,9 +14,29 @@ export default function ArticlePage() {
   // Use article from location.state if available, otherwise fallback (could fetch by id here)
   const article = location.state?.article || {};
 
-  const handleLike = () => setLiked((v) => !v);
-  const handleDislike = () => setDisliked((v) => !v);
-  const handleShare = () => setShared(true);
+  const handleLike = () => {
+    setLiked((v) => !v);
+    if (!liked && disliked) setDisliked(false);
+  };
+  const handleDislike = () => {
+    setDisliked((v) => !v);
+    if (!disliked && liked) setLiked(false);
+  };
+  const handleShare = async () => {
+    setShared(true);
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: article.title,
+          text: article.summary || article.description,
+          url: article.url
+        });
+      } catch (e) {}
+    } else {
+      navigator.clipboard.writeText(article.url);
+      alert('Link copied to clipboard!');
+    }
+  };
   const handleReadOriginal = () => window.open(article.url, '_blank');
 
   // Get image
@@ -65,24 +86,76 @@ export default function ArticlePage() {
         >
           <FaGlobe /> <FaExternalLinkAlt /> Read Original Article
         </button>
-        <button
+        <motion.button
           onClick={handleLike}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-700 text-base font-medium transition-colors ${liked ? 'bg-teal-500 text-white' : 'text-custom-gray hover:bg-gray-800'}`}
+          whileTap={{ scale: 1.2, rotate: 10 }}
+          whileHover={{ scale: 1.08 }}
         >
-          <FaThumbsUp /> Like
-        </button>
-        <button
+          <AnimatePresence initial={false} mode="wait">
+            {liked ? (
+              <motion.span
+                key="liked"
+                initial={{ scale: 0.7, rotate: -30, opacity: 0 }}
+                animate={{ scale: 1, rotate: 0, opacity: 1 }}
+                exit={{ scale: 0.7, rotate: 30, opacity: 0 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+              >
+                <FaThumbsUp />
+              </motion.span>
+            ) : (
+              <motion.span
+                key="not-liked"
+                initial={{ scale: 0.7, rotate: 30, opacity: 0 }}
+                animate={{ scale: 1, rotate: 0, opacity: 1 }}
+                exit={{ scale: 0.7, rotate: -30, opacity: 0 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+              >
+                <FaThumbsUp />
+              </motion.span>
+            )}
+          </AnimatePresence>
+          Like
+        </motion.button>
+        <motion.button
           onClick={handleDislike}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-700 text-base font-medium transition-colors ${disliked ? 'bg-pink-500 text-white' : 'text-custom-gray hover:bg-gray-800'}`}
+          whileTap={{ scale: 1.2, rotate: -10 }}
+          whileHover={{ scale: 1.08 }}
         >
-          <FaThumbsDown /> Dislike
-        </button>
-        <button
+          <AnimatePresence initial={false} mode="wait">
+            {disliked ? (
+              <motion.span
+                key="disliked"
+                initial={{ scale: 0.7, rotate: 30, opacity: 0 }}
+                animate={{ scale: 1, rotate: 0, opacity: 1 }}
+                exit={{ scale: 0.7, rotate: -30, opacity: 0 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+              >
+                <FaThumbsDown />
+              </motion.span>
+            ) : (
+              <motion.span
+                key="not-disliked"
+                initial={{ scale: 0.7, rotate: -30, opacity: 0 }}
+                animate={{ scale: 1, rotate: 0, opacity: 1 }}
+                exit={{ scale: 0.7, rotate: 30, opacity: 0 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+              >
+                <FaThumbsDown />
+              </motion.span>
+            )}
+          </AnimatePresence>
+          Dislike
+        </motion.button>
+        <motion.button
           onClick={handleShare}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-700 text-base font-medium transition-colors ${shared ? 'bg-cyan-500 text-white' : 'text-custom-gray hover:bg-gray-800'}`}
+          whileTap={{ scale: 1.2, rotate: 5 }}
+          whileHover={{ scale: 1.08 }}
         >
           <FaShare /> Share
-        </button>
+        </motion.button>
       </div>
     </div>
   );

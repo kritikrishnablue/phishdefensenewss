@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { FaBookmark, FaShare, FaThumbsUp, FaThumbsDown, FaEye, FaExternalLinkAlt, FaPlay, FaClock } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 import { userAPI } from '../services/api';
@@ -206,16 +207,37 @@ export default function NewsCard({ article, onLike, onBookmark, onShare, showSta
           </div>
           
           {/* Bookmark Button */}
-          <button
+          <motion.button
             onClick={handleBookmark}
             className="absolute top-3 right-3 p-2 bg-black/50 backdrop-blur-sm rounded-full hover:bg-black/70 transition-all"
+            whileTap={{ scale: 1.3, rotate: 20 }}
+            whileHover={{ scale: 1.1 }}
+            aria-label="Bookmark"
           >
-            {isBookmarked ? (
-              <FaBookmark className="text-teal-400 text-sm" />
-            ) : (
-              <FaBookmark className="text-gray-400 text-sm" />
-            )}
-          </button>
+            <AnimatePresence initial={false} mode="wait">
+              {isBookmarked ? (
+                <motion.span
+                  key="bookmarked"
+                  initial={{ scale: 0.7, rotate: -30, opacity: 0 }}
+                  animate={{ scale: 1, rotate: 0, opacity: 1 }}
+                  exit={{ scale: 0.7, rotate: 30, opacity: 0 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                >
+                  <FaBookmark className="text-teal-400 text-sm" />
+                </motion.span>
+              ) : (
+                <motion.span
+                  key="not-bookmarked"
+                  initial={{ scale: 0.7, rotate: 30, opacity: 0 }}
+                  animate={{ scale: 1, rotate: 0, opacity: 1 }}
+                  exit={{ scale: 0.7, rotate: -30, opacity: 0 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                >
+                  <FaBookmark className="text-gray-400 text-sm" />
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </motion.button>
         </div>
 
         {/* Article Content */}

@@ -64,7 +64,7 @@ export default function Home() {
       console.error('Failed to load trending articles:', error);
     } finally {
       setTrendingLoading(false);
-    }
+    } 
   };
 
   // Fetch personalized or general news

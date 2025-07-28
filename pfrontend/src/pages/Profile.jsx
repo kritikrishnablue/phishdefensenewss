@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { userAPI } from '../services/api';
+import { userAPI, locationAPI } from '../services/api';
 import { FaUser, FaCog, FaHistory, FaBookmark, FaHeart, FaGlobe, FaNewspaper, FaSave } from 'react-icons/fa';
 
 export default function Profile() {
@@ -15,6 +15,7 @@ export default function Profile() {
     countries: []
   });
   const [recentlyViewed, setRecentlyViewed] = useState([]);
+  const [detectedLocation, setDetectedLocation] = useState(null);
 
   const countries = [
     { code: 'us', name: 'United States' },
@@ -42,6 +43,8 @@ export default function Profile() {
     if (user) {
       loadProfile();
     }
+    // Fetch detected location
+    locationAPI.getLocation().then(loc => setDetectedLocation(loc.location)).catch(() => setDetectedLocation(null));
   }, [user]);
 
   const loadProfile = async () => {
@@ -163,6 +166,7 @@ export default function Profile() {
                   <p className="text-gray-300"><strong>Email:</strong> {user.email}</p>
                   <p className="text-gray-300"><strong>Username:</strong> {user.username || 'N/A'}</p>
                   <p className="text-gray-300"><strong>Member since:</strong> {new Date().toLocaleDateString()}</p>
+                  <p className="text-gray-300"><strong>Detected Location:</strong> {detectedLocation ? `${detectedLocation.city || ''}${detectedLocation.city ? ', ' : ''}${detectedLocation.region || ''}${detectedLocation.region ? ', ' : ''}${detectedLocation.country_name || detectedLocation.country_code || 'Unknown'}` : 'Detecting...'}</p>
                 </div>
                 <div className="bg-gray-700 p-4 rounded-lg">
                   <h3 className="font-semibold mb-2 text-white">Statistics</h3>

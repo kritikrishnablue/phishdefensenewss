@@ -28,6 +28,7 @@ import {
   FaLaptop,
   FaMicroscope
 } from 'react-icons/fa';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Home,
   Shield,
@@ -64,14 +65,32 @@ export default function Layout({ children }) {
   const { isAuthenticated, logout, user } = useAuth();
   const { isDarkMode, toggleTheme } = useTheme();
   const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
 
   const handleLogout = () => {
     logout();
     navigate('/');
   };
 
+  // Handle search submit
+  const handleSearch = (e) => {
+    if (e) e.preventDefault();
+    navigate('/search', { state: { keyword: searchTerm.trim() } });
+    setSearchTerm("");
+  };
+
+  // Open search page on search bar click
+  const handleSearchBarClick = () => {
+    navigate('/search');
+  };
+
+  // Responsive and theme-aware background
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#111827' }}>
+    <div
+      className={`min-h-screen ${isDarkMode ? 'dark' : 'light'} bg-gray-50 dark:bg-[#111827] transition-colors duration-500`}
+      style={{ backgroundColor: isDarkMode ? '#111827' : '#f8fafc' }}
+    >
       {/* Top Navigation Bar */}
       <header className="sticky top-0 z-50 style={{ backgroundColor: '#111827' }} backdrop-blur-md border-b border-gray-700">
         <div className="flex items-center justify-between px-6 py-4">
@@ -138,7 +157,7 @@ export default function Layout({ children }) {
             >
               Trending
             </NavLink>
-            {/* <NavLink
+            <NavLink
               to="/bookmarks"
               className={({ isActive }) =>
                 `px-4 py-2 rounded-lg font-medium transition-colors ${
@@ -149,30 +168,59 @@ export default function Layout({ children }) {
               }
             >
               Saved
-            </NavLink> */}
+            </NavLink>
           </nav>
 
           {/* Right: Search and Actions */}
           <div className="flex items-center gap-4">
             {/* Search Bar */}
-            <div className="hidden sm:block relative">
-              <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm" />
+            <form className="hidden sm:block relative" onSubmit={handleSearch}>
+              <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm cursor-pointer" onClick={handleSearch} />
               <input
                 type="text"
                 placeholder="Search news..."
-                className="w-64 pl-10 pr-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                onClick={handleSearchBarClick}
+                className="w-64 pl-10 pr-4 py-2 bg-slate-100 border border-slate-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
+                style={{ background: isDarkMode ? '#374151' : '#fff', color: isDarkMode ? '#fff' : '#111', borderColor: isDarkMode ? '#374151' : '#e5e7eb' }}
               />
-            </div>
+            </form>
 
             {/* Action Buttons */}
             <div className="flex items-center gap-2">
-              <button 
+              <motion.button
                 onClick={toggleTheme}
-                className="p-2 rounded-lg hover:bg-gray-700 transition-colors text-gray-400"
+                className="p-2 rounded-lg transition-colors text-gray-400"
                 title={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                whileTap={{ rotate: 180, scale: 1.2 }}
+                whileHover={{ scale: 1.1 }}
+                style={{ background: isDarkMode ? '#374151' : '#e0f7fa' }}
               >
-                {isDarkMode ? <FaSun className="text-yellow-500" /> : <FaMoon className="text-blue-800" />}
-              </button>
+                <AnimatePresence initial={false} mode="wait">
+                  {isDarkMode ? (
+                    <motion.span
+                      key="sun"
+                      initial={{ opacity: 0, rotate: -90 }}
+                      animate={{ opacity: 1, rotate: 0 }}
+                      exit={{ opacity: 0, rotate: 90 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <FaSun className="text-yellow-500" />
+                    </motion.span>
+                  ) : (
+                    <motion.span
+                      key="moon"
+                      initial={{ opacity: 0, rotate: 90 }}
+                      animate={{ opacity: 1, rotate: 0 }}
+                      exit={{ opacity: 0, rotate: -90 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <FaMoon className="text-blue-800" />
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </motion.button>
               
               {/* <button className="p-2 rounded-lg hover:bg-gray-700 transition-colors text-gray-400">
                 <FaBell />
@@ -194,11 +242,11 @@ export default function Layout({ children }) {
                 <FaBookmark />
               </button>  */}
               <NavLink
-  to="/bookmarks"
-  className="p-2 rounded-lg hover:bg-gray-700 transition-colors text-gray-400"
->
-  <FaBookmark />
-</NavLink>
+                to="/bookmarks"
+                className="p-2 rounded-lg hover:bg-gray-700 transition-colors text-gray-400"
+              >
+                <FaBookmark />
+              </NavLink>
               <NavLink
                 to="/settings"
                 className="p-2 rounded-lg hover:bg-gray-700 transition-colors text-gray-400"
@@ -207,34 +255,42 @@ export default function Layout({ children }) {
               </NavLink>
               
               {/* User Menu */}
-              {isAuthenticated ? (
-                <div className="flex items-center gap-3">
-                  <span className="hidden sm:block text-sm text-gray-300">
-                    {user?.username || user?.email?.split('@')[0]}
-                  </span>
-                  <button
-                    onClick={handleLogout}
-                    className="p-2 rounded-lg hover:bg-gray-700 transition-colors text-gray-400"
-                  >
-                    <FaUser />
-                  </button>
-                </div>
-              ) : (
-                <div className="hidden sm:flex items-center gap-2">
-                  <NavLink
-                    to="/login"
-                    className="px-4 py-2 text-gray-300 hover:text-white transition-colors"
-                  >
-                    Login
-                  </NavLink>
-                  <NavLink
-                    to="/register"
-                    className="px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors"
-                  >
-                    Sign Up
-                  </NavLink>
-                </div>
-              )}
+              <div className="relative">
+                <button
+                  className="p-2 rounded-full hover:bg-gray-700 transition-colors text-gray-400 focus:outline-none"
+                  onClick={() => setShowProfileDropdown((v) => !v)}
+                >
+                  <FaUser />
+                </button>
+                <AnimatePresence>
+                  {showProfileDropdown && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.2 }}
+                      className="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 rounded-lg shadow-lg z-50 border border-gray-200 dark:border-gray-700"
+                    >
+                      <div className="flex flex-col py-2">
+                        <NavLink
+                          to="/login"
+                          className="px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                          onClick={() => setShowProfileDropdown(false)}
+                        >
+                          Login
+                        </NavLink>
+                        <NavLink
+                          to="/register"
+                          className="px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                          onClick={() => setShowProfileDropdown(false)}
+                        >
+                          Sign Up
+                        </NavLink>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
           </div>
         </div>
@@ -269,6 +325,7 @@ export default function Layout({ children }) {
                 onMouseOut={e => {
                   e.currentTarget.style.background = '#123840';
                 }}
+                onClick={() => navigate('/categories')}
               >
                 <div className="flex items-center gap-3">
                   {/* Custom 3x3 grid icon */}
