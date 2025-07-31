@@ -10,7 +10,7 @@ export default function Bookmarks() {
   const [error, setError] = useState(null);
   const { isAuthenticated } = useAuth();
 
-  useEffect(() => {
+  useEffect(() => {  
     if (isAuthenticated) {
       loadBookmarks();
     }

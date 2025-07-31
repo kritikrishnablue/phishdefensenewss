@@ -371,16 +371,19 @@ export default function Layout({ children }) {
                 {sidebarCategories.map((category) => (
                   <NavLink
                     key={category.id}
-                    to={category.id === 'all' ? '/' : '/search'}
-                    state={category.id === 'all' ? {} : { category: category.id }}
+                    to="/"
                     className={({ isActive }) =>
                       `flex items-center justify-between px-5 py-2 rounded-lg text-sm font-medium transition-colors ${
-                        isActive && category.id === 'all'
+                        isActive && category.id === window.sessionStorage.getItem('selectedCategory')
                           ? 'bg-teal-500 text-white'
                           : 'text-white hover:bg-gray-700 hover:text-white'
                       }`
                     }
-                    onClick={() => setSidebarOpen(false)}
+                    onClick={() => {
+                      setSidebarOpen(false);
+                      window.sessionStorage.setItem('selectedCategory', category.id);
+                      window.dispatchEvent(new CustomEvent('categoryChanged', { detail: category.id }));
+                    }}
                   >
                     {({ isActive }) => (
                       <>

@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import NewsCard from '../components/NewsCard';
 import Filters from '../components/Filters';
 import { newsAPI, locationAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { FaFire, FaGlobe, FaNewspaper, FaRss, FaChartLine } from 'react-icons/fa';
 
 export default function Home() {
+  const { isDarkMode } = useTheme();
   const [filters, setFilters] = useState({ 
     country: 'us', 
     category: '', 
@@ -29,6 +32,22 @@ export default function Home() {
   // Load trending articles
   useEffect(() => {
     loadTrendingArticles();
+  }, []);
+
+  // Handle category changes from sidebar
+  useEffect(() => {
+    const savedCategory = window.sessionStorage.getItem('selectedCategory');
+    if (savedCategory) {
+      setFilters(prev => ({ ...prev, category: savedCategory === 'all' ? '' : savedCategory }));
+    }
+
+    const handleCategoryChange = (event) => {
+      const newCategory = event.detail;
+      setFilters(prev => ({ ...prev, category: newCategory === 'all' ? '' : newCategory }));
+    };
+
+    window.addEventListener('categoryChanged', handleCategoryChange);
+    return () => window.removeEventListener('categoryChanged', handleCategoryChange);
   }, []);
 
   // Fetch news when filters change or auth state changes
@@ -94,92 +113,196 @@ export default function Home() {
     }
   };
 
+  const handleCategoryChange = (category) => {
+    setFilters(prev => ({
+      ...prev,
+      category: category
+    }));
+  };
+
   const trendingTopics = [
     'Tech Layoffs', 'Climate Change', 'Space Exploration', 
     'Cryptocurrency', 'Remote Work', 'Healthcare AI'
   ];
 
   return (
-    <div className="bg-slate-900 min-h-screen">
+    <div className={`min-h-screen theme-transition ${
+      isDarkMode ? 'bg-gray-900' : 'bg-gray-50'
+    }`}>
       {/* Trending Topics Bar */}
-      <div className="bg-slate-800 border-b border-slate-700 px-6 py-4">
+      <motion.div 
+        className={`border-b px-6 py-4 theme-transition ${
+          isDarkMode 
+            ? 'bg-gray-800 border-gray-700' 
+            : 'bg-white border-gray-200'
+        }`}
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <FaFire className="text-orange-500" />
-            <span className="font-semibold text-white">Trending:</span>
+            <motion.div
+              animate={{ scale: [1, 1.1, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              <FaFire className="text-orange-500" />
+            </motion.div>
+            <span className={`font-semibold ${
+              isDarkMode ? 'text-white' : 'text-gray-900'
+            }`}>Trending:</span>
           </div>
           <div className="flex flex-wrap gap-3">
             {trendingTopics.map((topic, index) => (
-              <button
+              <motion.button
                 key={index}
-                className="px-3 py-1 bg-slate-700 text-gray-300 rounded-full text-sm font-medium hover:bg-slate-600 transition-colors"
+                className={`px-3 py-1 rounded-full text-sm font-medium transition-all duration-300 hover-lift ${
+                  isDarkMode 
+                    ? 'bg-gray-700 text-gray-300 hover:bg-gray-600 hover:text-white' 
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300 hover:text-gray-900'
+                }`}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.1 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
                 {topic}
-              </button>
+              </motion.button>
             ))}
           </div>
         </div>
-      </div>
+      </motion.div>
 
       <div className="px-6 py-8">
         {/* Header Section */}
-        <div className="mb-8">
+        <motion.div 
+          className="mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-3xl font-bold text-white mb-2">
-                Latest News
+              <h1 className={`text-3xl font-bold mb-2 ${
+                isDarkMode ? 'text-white' : 'text-gray-900'
+              }`}>
+                {filters.category ? `${filters.category.charAt(0).toUpperCase() + filters.category.slice(1)} News` : 'Latest News'}
               </h1>
-              <p className="text-gray-400">
+              <p className={`${
+                isDarkMode ? 'text-gray-400' : 'text-gray-600'
+              }`}>
                 {articles.length} articles • AI-summarized for quick reading
               </p>
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Content Area */}
         <div className="space-y-8">
-          {loading && (
-            <div className="flex flex-col items-center justify-center py-16">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-500 mb-4"></div>
-              <p className="text-gray-400">Loading latest news...</p>
-            </div>
-          )}
+          <AnimatePresence mode="wait">
+            {loading && (
+              <motion.div 
+                className="flex flex-col items-center justify-center py-16"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <motion.div 
+                  className="rounded-full h-12 w-12 border-b-2 border-teal-500 mb-4"
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                />
+                <p className={`${
+                  isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                }`}>Loading latest news...</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
           
-          {error && (
-            <div className="bg-red-900/20 border border-red-800 rounded-xl p-6">
+          <AnimatePresence>
+            {error && (
+              <motion.div 
+                className={`border rounded-xl p-6 ${
+                  isDarkMode 
+                    ? 'bg-red-900/20 border-red-800' 
+                    : 'bg-red-50 border-red-200'
+                }`}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+              >
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-red-900 rounded-full flex items-center justify-center">
-                  <span className="text-red-400 text-sm">⚠</span>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                  isDarkMode ? 'bg-red-900' : 'bg-red-100'
+                }`}>
+                  <span className={`text-sm ${
+                    isDarkMode ? 'text-red-400' : 'text-red-600'
+                  }`}>⚠</span>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-red-200">Error Loading News</h3>
-                  <p className="text-red-300 text-sm">{error}</p>
+                  <h3 className={`font-semibold ${
+                    isDarkMode ? 'text-red-200' : 'text-red-800'
+                  }`}>Error Loading News</h3>
+                  <p className={`text-sm ${
+                    isDarkMode ? 'text-red-300' : 'text-red-700'
+                  }`}>{error}</p>
                 </div>
               </div>
-            </div>
-          )}
+              </motion.div>
+            )}
+          </AnimatePresence>
           
-          {!loading && !error && articles.length === 0 && (
-            <div className="text-center py-16">
-              <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                <FaNewspaper className="text-gray-400 text-xl" />
+          <AnimatePresence>
+            {!loading && !error && articles.length === 0 && (
+              <motion.div 
+                className="text-center py-16"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+              >
+              <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${
+                isDarkMode ? 'bg-gray-800' : 'bg-gray-200'
+              }`}>
+                <FaNewspaper className={`text-xl ${
+                  isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                }`} />
               </div>
-              <h3 className="text-lg font-semibold text-white mb-2">No Articles Found</h3>
-              <p className="text-gray-400">Try adjusting your filters or check back later.</p>
-            </div>
-          )}
+              <h3 className={`text-lg font-semibold mb-2 ${
+                isDarkMode ? 'text-white' : 'text-gray-900'
+              }`}>No Articles Found</h3>
+              <p className={`${
+                isDarkMode ? 'text-gray-400' : 'text-gray-600'
+              }`}>Try adjusting your filters or check back later.</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
           
           {!loading && !error && articles.length > 0 && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            <motion.div 
+              className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6 }}
+            >
               {articles.map((article, index) => (
-                <div key={article.url || article.title} className={`fade-in stagger-${Math.min(index + 1, 6)}`}>
+                <motion.div 
+                  key={article.url || article.title} 
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ 
+                    duration: 0.5, 
+                    delay: index * 0.1,
+                    ease: "easeOut"
+                  }}
+                >
                   <NewsCard
                     article={article}
                     showStatus={true}
                   />
-                </div>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           )}
         </div>
       </div>

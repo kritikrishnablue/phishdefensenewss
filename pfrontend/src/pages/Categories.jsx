@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {  Shield, Heart, Laptop,Home,Landmark,Trophy,Microscope,Building, Globe, Plane } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useTheme } from '../context/ThemeContext';
 import { FaFire } from 'react-icons/fa'; 
 
 export default function Categories() {
+  const { isDarkMode } = useTheme();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -126,98 +129,196 @@ export default function Categories() {
   const trendingCategories = categories.filter(cat => cat.trending);
   const allCategories = categories;
 
-  if (loading) {
-    return (
-      <div className="p-4 max-w-6xl mx-auto">
-        <div className="text-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-500 mx-auto"></div>
-          <p className="mt-2 text-gray-400">Loading categories...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className="p-4 max-w-6xl mx-auto">
+    <div className={`p-4 max-w-6xl mx-auto min-h-screen theme-transition ${
+      isDarkMode ? 'bg-gray-900' : 'bg-gray-50'
+    }`}>
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">Categories</h1>
-        <p className="text-gray-400">
+      <motion.div 
+        className="mb-8"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        <h1 className={`text-3xl font-bold mb-2 ${
+          isDarkMode ? 'text-white' : 'text-gray-900'
+        }`}>Categories</h1>
+        <p className={`${
+          isDarkMode ? 'text-gray-400' : 'text-gray-600'
+        }`}>
           Explore news by category and discover trending topics
         </p>
-      </div>
+      </motion.div>
 
-      {/* Trending Categories */}
-      <div className="mb-8">
-        <div className="flex items-center gap-2 mb-6">
-          <FaFire className="text-orange-500 text-lg" />
-          <h2 className="text-2xl font-bold text-white">Trending Categories</h2>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {trendingCategories.map((category) => (
-            <CategoryCard 
-              key={category.id} 
-              category={category} 
-              onClick={() => handleCategoryClick(category.id)}
+      <AnimatePresence mode="wait">
+        {loading ? (
+          <motion.div 
+            className="text-center py-8"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div 
+              className="rounded-full h-8 w-8 border-b-2 border-cyan-500 mx-auto"
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
             />
-          ))}
-        </div>
-      </div>
+            <p className={`mt-2 ${
+              isDarkMode ? 'text-gray-400' : 'text-gray-600'
+            }`}>Loading categories...</p>
+          </motion.div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6 }}
+          >
+            {/* Trending Categories */}
+            <div className="mb-8">
+              <motion.div 
+                className="flex items-center gap-2 mb-6"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <motion.div
+                  animate={{ scale: [1, 1.1, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  <FaFire className="text-orange-500 text-lg" />
+                </motion.div>
+                <h2 className={`text-2xl font-bold ${
+                  isDarkMode ? 'text-white' : 'text-gray-900'
+                }`}>Trending Categories</h2>
+              </motion.div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {trendingCategories.map((category, index) => (
+                  <motion.div
+                    key={category.id}
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ 
+                      duration: 0.5, 
+                      delay: index * 0.1,
+                      ease: "easeOut"
+                    }}
+                  >
+                    <CategoryCard 
+                      category={category} 
+                      onClick={() => handleCategoryClick(category.id)}
+                      isDarkMode={isDarkMode}
+                    />
+                  </motion.div>
+                ))}
+              </div>
+            </div>
 
-      {/* All Categories */}
-      <div>
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-white">All Categories</h2>
-          <span className="text-gray-400 text-sm">{allCategories.length} categories available</span>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {allCategories.map((category) => (
-            <CategoryCard 
-              key={category.id} 
-              category={category} 
-              onClick={() => handleCategoryClick(category.id)}
-            />
-          ))}
-        </div>
-      </div>
+            {/* All Categories */}
+            <div>
+              <motion.div 
+                className="flex items-center justify-between mb-6"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+              >
+                <h2 className={`text-2xl font-bold ${
+                  isDarkMode ? 'text-white' : 'text-gray-900'
+                }`}>All Categories</h2>
+                <span className={`text-sm ${
+                  isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                }`}>{allCategories.length} categories available</span>
+              </motion.div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {allCategories.map((category, index) => (
+                  <motion.div
+                    key={category.id}
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ 
+                      duration: 0.5, 
+                      delay: (index + trendingCategories.length) * 0.05,
+                      ease: "easeOut"
+                    }}
+                  >
+                    <CategoryCard 
+                      category={category} 
+                      onClick={() => handleCategoryClick(category.id)}
+                      isDarkMode={isDarkMode}
+                    />
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
 
-function CategoryCard({ category, onClick }) {
+function CategoryCard({ category, onClick, isDarkMode }) {
   const IconComponent = category.icon;
   
   return (
-    <div 
-      className="bg-gray-800 rounded-lg p-6 hover:bg-gray-700 transition-colors cursor-pointer border border-gray-700 hover:border-gray-600"
+    <motion.div 
+      className={`rounded-lg p-6 cursor-pointer border transition-all duration-300 hover-lift ${
+        isDarkMode 
+          ? 'bg-gray-800 hover:bg-gray-700 border-gray-700 hover:border-gray-600' 
+          : 'bg-white hover:bg-gray-50 border-gray-200 hover:border-gray-300'
+      }`}
       onClick={onClick}
+      whileHover={{ y: -4, scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
     >
       <div className="flex items-start justify-between mb-4">
         <div className={`w-12 h-12 ${category.color} rounded-lg flex items-center justify-center`}>
-          <IconComponent className="text-white text-xl" />
+          <motion.div
+            whileHover={{ rotate: 10, scale: 1.1 }}
+            transition={{ type: "spring", stiffness: 400, damping: 10 }}
+          >
+            <IconComponent className="text-white text-xl" />
+          </motion.div>
         </div>
         {category.trending && (
-          <div className="flex items-center gap-1 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+          <motion.div 
+            className="flex items-center gap-1 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-medium"
+            animate={{ scale: [1, 1.05, 1] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
             <FaFire className="text-xs" />
             Trending
-          </div>
+          </motion.div>
         )}
       </div>
       
-      <h3 className="text-white font-bold text-lg mb-2">{category.title}</h3>
-      <p className="text-gray-400 text-sm mb-4 line-clamp-2">
+      <h3 className={`font-bold text-lg mb-2 ${
+        isDarkMode ? 'text-white' : 'text-gray-900'
+      }`}>{category.title}</h3>
+      <p className={`text-sm mb-4 line-clamp-2 ${
+        isDarkMode ? 'text-gray-400' : 'text-gray-600'
+      }`}>
         {category.description}
       </p>
       
       <div className="flex items-center justify-between">
-        <span className="text-gray-500 text-sm">{category.articleCount} articles</span>
-        <button className="flex items-center gap-1 text-green-400 hover:text-green-300 transition-colors font-medium">
+        <span className={`text-sm ${
+          isDarkMode ? 'text-gray-500' : 'text-gray-600'
+        }`}>{category.articleCount} articles</span>
+        <motion.button 
+          className={`flex items-center gap-1 font-medium transition-colors duration-300 ${
+            isDarkMode 
+              ? 'text-green-400 hover:text-green-300' 
+              : 'text-green-600 hover:text-green-700'
+          }`}
+          whileHover={{ x: 5 }}
+        >
           Explore
           <span className="text-sm">→</span>
-        </button>
+        </motion.button>
       </div>
-    </div>
+    </motion.div>
   );
 } 
